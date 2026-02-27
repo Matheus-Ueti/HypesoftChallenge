@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
+import { ProductForm } from '@/components/forms/ProductForm'
 
 // --- Tipos ---
 
@@ -58,15 +60,28 @@ const StockBadge = ({ stock }: { stock: number }) => (
 
 // --- Componente ---
 
-export const Products = () => (
+export const Products = () => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
   <div className={page}>
+
+    {isOpen && (
+      <ProductForm
+        onClose={() => setIsOpen(false)}
+        onSubmit={(data) => {
+          console.log('Novo produto:', data)
+          setIsOpen(false)
+        }}
+      />
+    )}
 
     <div className={pageHeader}>
       <div>
         <h1 className={pageTitle}>Produtos</h1>
         <p className={pageSubtitle}>Gerencie todos os produtos do sistema</p>
       </div>
-      <button className={btnPrimary}>+ Novo Produto</button>
+      <button className={btnPrimary} onClick={() => setIsOpen(true)}>+ Novo Produto</button>
     </div>
 
     <div className={card}>
@@ -104,4 +119,5 @@ export const Products = () => (
     </div>
 
   </div>
-)
+  )
+}
