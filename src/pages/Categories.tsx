@@ -42,17 +42,18 @@ const countValue   = 'text-xs font-semibold text-indigo-600'
 // --- Sub-componente ---
 
 interface CategoryCardProps extends CategoryWithCount {
+  onEdit:   (category: CategoryWithCount) => void
   onDelete: (id: string) => void
 }
 
-const CategoryCard = ({ id, name, description, productCount, onDelete }: CategoryCardProps) => (
+const CategoryCard = ({ id, name, description, productCount, onEdit, onDelete }: CategoryCardProps) => (
   <div className={card}>
     <div className={cardHeader}>
       <div className={iconWrapper}>
         <Tag size={16} />
       </div>
       <div className={actions}>
-        <button className={actionBtn} title="Editar">
+        <button className={actionBtn} title="Editar" onClick={() => onEdit({ id, name, description, productCount })}>
           <Pencil size={14} />
         </button>
         <button className={actionBtn} title="Excluir" onClick={() => onDelete(id)}>
@@ -76,7 +77,8 @@ const CategoryCard = ({ id, name, description, productCount, onDelete }: Categor
 // --- Componente ---
 
 export const Categories = () => {
-  const [isOpen, setIsOpen]       = useState(false)
+  const [isOpen, setIsOpen]         = useState(false)
+  const [editing, setEditing]       = useState<CategoryWithCount | null>(null)
   const [categories, setCategories] = useState(INITIAL_CATEGORIES)
 
   const handleCreate = (data: { name: string; description?: string }) => {
@@ -88,6 +90,18 @@ export const Categories = () => {
     }
     setCategories((prev) => [...prev, newCategory])
     setIsOpen(false)
+  }
+
+  const handleEdit = (data: { name: string; description?: string }) => {
+    if (!editing) return
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === editing.id
+          ? { ...cat, name: data.name, description: data.description ?? '' }
+          : cat
+      )
+    )
+    setEditing(null)
   }
 
   const handleDelete = (id: string) => {
@@ -104,6 +118,14 @@ export const Categories = () => {
       />
     )}
 
+    {editing && (
+      <CategoryForm
+        defaultValues={editing}
+        onClose={() => setEditing(null)}
+        onSubmit={handleEdit}
+      />
+    )}
+
     <div className={pageHeader}>
       <div>
         <h1 className={pageTitle}>Categorias</h1>
@@ -114,7 +136,7 @@ export const Categories = () => {
 
     <div className={grid}>
       {categories.map((category) => (
-        <CategoryCard key={category.id} {...category} onDelete={handleDelete} />
+        <CategoryCard key={category.id} {...category} onEdit={setEditing} onDelete={handleDelete} />
       ))}
     </div>
 
