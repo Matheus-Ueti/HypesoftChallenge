@@ -8,20 +8,13 @@ import { Settings } from './pages/Settings'
 import { AuthContext } from './contexts/AuthContext'
 import { useAuth } from './hooks/useAuth'
 
-// --- Estilos ---
-
-const loadingScreen = 'flex h-screen items-center justify-center bg-slate-50'
-const loadingText   = 'text-sm text-slate-500'
-
-// --- Componente ---
-
 export const App = () => {
   const { isAuthenticated, isLoading, logout } = useAuth()
 
   if (isLoading) {
     return (
-      <div className={loadingScreen}>
-        <p className={loadingText}>Carregando...</p>
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">Carregando...</p>
       </div>
     )
   }
@@ -30,8 +23,6 @@ export const App = () => {
     <AuthContext.Provider value={{ logout }}>
       <BrowserRouter>
         <Routes>
-
-          {/* Rotas protegidas */}
           <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
             <Route element={<MainLayout />}>
               <Route path="/"           element={<Dashboard />} />
@@ -40,10 +31,7 @@ export const App = () => {
               <Route path="/settings"   element={<Settings />} />
             </Route>
           </Route>
-
-          {/* Rota não encontrada → volta para home */}
           <Route path="*" element={<Navigate to="/" replace />} />
-
         </Routes>
       </BrowserRouter>
     </AuthContext.Provider>

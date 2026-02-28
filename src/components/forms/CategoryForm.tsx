@@ -2,9 +2,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
+import { Button }   from '@/components/ui/button'
+import { Input }    from '@/components/ui/input'
+import { Label }    from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import type { Category } from '@/types/category'
-
-// --- Schema ---
 
 const schema = z.object({
   name:        z.string().min(1, 'Nome é obrigatório'),
@@ -13,32 +15,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-// --- Tipos ---
-
 interface CategoryFormProps {
   defaultValues?: Partial<Category>
   onSubmit: (data: FormData) => void
   onClose: () => void
 }
 
-// --- Estilos ---
-
-const overlay   = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50'
-const modal     = 'bg-white rounded-2xl w-full max-w-md p-6 shadow-xl'
-const header    = 'flex items-center justify-between mb-6'
-const title     = 'text-lg font-semibold text-slate-800'
-const closeBtn  = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors'
-const form      = 'flex flex-col gap-4'
-const fieldGroup = 'flex flex-col gap-1'
-const label     = 'text-sm font-medium text-slate-700'
-const input     = 'border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition'
-const inputError = 'border border-red-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-red-200 transition'
-const errorMsg  = 'text-xs text-red-500'
-const footer    = 'flex justify-end gap-2 mt-2'
-const btnCancel = 'px-4 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition-colors'
-const btnSubmit = 'px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors'
-
-// --- Componente ---
+const errorCls = 'border-red-300 focus-visible:ring-red-200'
 
 export const CategoryForm = ({ defaultValues, onSubmit, onClose }: CategoryFormProps) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
@@ -52,38 +35,36 @@ export const CategoryForm = ({ defaultValues, onSubmit, onClose }: CategoryFormP
   const isEditing = !!defaultValues?.id
 
   return (
-    <div className={overlay} onClick={onClose}>
-      <div className={modal} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
 
-        <div className={header}>
-          <h2 className={title}>{isEditing ? 'Editar Categoria' : 'Nova Categoria'}</h2>
-          <button className={closeBtn} onClick={onClose}><X size={18} /></button>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-slate-800">
+            {isEditing ? 'Editar Categoria' : 'Nova Categoria'}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X size={18} />
+          </Button>
         </div>
 
-        <form className={form} onSubmit={handleSubmit(onSubmit)}>
-
-          <div className={fieldGroup}>
-            <label htmlFor="name" className={label}>Nome</label>
-            <input id="name" className={errors.name ? inputError : input} {...register('name')} />
-            {errors.name && <span className={errorMsg}>{errors.name.message}</span>}
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="name">Nome</Label>
+            <Input id="name" className={errors.name ? errorCls : ''} {...register('name')} />
+            {errors.name && <span className="text-xs text-red-500">{errors.name.message}</span>}
           </div>
 
-          <div className={fieldGroup}>
-            <label htmlFor="description" className={label}>Descrição (opcional)</label>
-            <textarea
-              id="description"
-              rows={2}
-              className={input}
-              {...register('description')}
-            />
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="description">Descrição (opcional)</Label>
+            <Textarea id="description" rows={2} {...register('description')} />
           </div>
 
-          <div className={footer}>
-            <button type="button" className={btnCancel} onClick={onClose}>Cancelar</button>
-            <button type="submit" className={btnSubmit}>{isEditing ? 'Salvar' : 'Criar'}</button>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button type="submit">{isEditing ? 'Salvar' : 'Criar'}</Button>
           </div>
-
         </form>
+
       </div>
     </div>
   )

@@ -8,47 +8,21 @@ import {
   useDeleteProduct,
 } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
+import { Button } from '@/components/ui/button'
+import { Input }  from '@/components/ui/input'
+import { Badge }  from '@/components/ui/badge'
 import type { Product, CreateProductDTO } from '@/types/product'
 
 const formatPrice = (value: number) =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-// --- Estilos ---
-
-const page            = 'space-y-6'
-const pageHeader      = 'flex items-center justify-between'
-const pageTitle       = 'text-2xl font-bold text-slate-800'
-const pageSubtitle    = 'text-sm text-slate-500 mt-1'
-const btnPrimary      = 'bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors'
-const card            = 'bg-white rounded-xl border border-slate-100 overflow-hidden'
-const table           = 'w-full text-sm'
-const thead           = 'bg-slate-50 border-b border-slate-100'
-const th              = 'text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-5 py-3'
-const tr              = 'border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0'
-const td              = 'px-5 py-3 text-slate-700'
-const tdMuted         = 'px-5 py-3 text-slate-400'
-const badgeNormal     = 'text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600'
-const badgeDanger     = 'text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-500'
-const actionBtn       = 'p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors'
-const actionBtnDanger = 'p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors'
-const searchWrapper   = 'relative'
-const searchIcon      = 'absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none'
-const searchInput     = 'pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition w-64'
-const emptyRow        = 'text-center text-sm text-slate-400 py-10'
-const filtersRow      = 'flex items-center gap-3'
-const select          = 'pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition bg-white text-slate-700'
-const feedbackMsg     = 'text-center text-sm text-slate-400 py-20'
-const errorMsg        = 'text-center text-sm text-red-500 py-20'
-
-// --- Sub-componentes ---
+const selectCls = 'pl-3 pr-8 py-2 text-sm border border-input rounded-md outline-none focus:ring-1 focus:ring-ring bg-background text-slate-700'
 
 const StockBadge = ({ stock }: { stock: number }) => (
-  <span className={stock <= 5 ? badgeDanger : badgeNormal}>
+  <Badge variant={stock <= 5 ? 'destructive' : 'secondary'}>
     {stock} un.
-  </span>
+  </Badge>
 )
-
-// --- Componente ---
 
 export const Products = () => {
   const { data: products = [], isLoading, isError } = useProducts()
@@ -58,9 +32,9 @@ export const Products = () => {
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
 
-  const [isOpen, setIsOpen]               = useState(false)
-  const [editing, setEditing]             = useState<Product | null>(null)
-  const [search, setSearch]               = useState('')
+  const [isOpen, setIsOpen]                 = useState(false)
+  const [editing, setEditing]               = useState<Product | null>(null)
+  const [search, setSearch]                 = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
 
   const categoryName = (categoryId: string) =>
@@ -87,13 +61,10 @@ export const Products = () => {
   const handleDelete = (id: string) => deleteProduct.mutate(id)
 
   return (
-  <div className={page}>
+  <div className="space-y-6">
 
     {isOpen && (
-      <ProductForm
-        onClose={() => setIsOpen(false)}
-        onSubmit={handleCreate}
-      />
+      <ProductForm onClose={() => setIsOpen(false)} onSubmit={handleCreate} />
     )}
 
     {editing && (
@@ -104,26 +75,26 @@ export const Products = () => {
       />
     )}
 
-    <div className={pageHeader}>
+    <div className="flex items-center justify-between">
       <div>
-        <h1 className={pageTitle}>Produtos</h1>
-        <p className={pageSubtitle}>Gerencie todos os produtos do sistema</p>
+        <h1 className="text-2xl font-bold text-slate-800">Produtos</h1>
+        <p className="text-sm text-slate-500 mt-1">Gerencie todos os produtos do sistema</p>
       </div>
-      <button className={btnPrimary} onClick={() => setIsOpen(true)}>+ Novo Produto</button>
+      <Button onClick={() => setIsOpen(true)}>+ Novo Produto</Button>
     </div>
 
-    <div className={filtersRow}>
-      <div className={searchWrapper}>
-        <Search size={15} className={searchIcon} />
-        <input
-          className={searchInput}
+    <div className="flex items-center gap-3">
+      <div className="relative">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        <Input
+          className="pl-9 w-64"
           placeholder="Buscar por nome..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
       <select
-        className={select}
+        className={selectCls}
         value={categoryFilter}
         onChange={(e) => setCategoryFilter(e.target.value)}
         aria-label="Filtrar por categoria"
@@ -135,39 +106,40 @@ export const Products = () => {
       </select>
     </div>
 
-    <div className={card}>
-      {isLoading && <p className={feedbackMsg}>Carregando produtos...</p>}
-      {isError   && <p className={errorMsg}>Erro ao carregar produtos. Tente novamente.</p>}
+    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      {isLoading && <p className="text-center text-sm text-slate-400 py-20">Carregando produtos...</p>}
+      {isError   && <p className="text-center text-sm text-red-500 py-20">Erro ao carregar produtos. Tente novamente.</p>}
 
       {!isLoading && !isError && (
-        <table className={table}>
-          <thead className={thead}>
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th className={th}>Nome</th>
-              <th className={th}>Categoria</th>
-              <th className={th}>Preço</th>
-              <th className={th}>Estoque</th>
-              <th className={th}>Ações</th>
+              {['Nome', 'Categoria', 'Preço', 'Estoque', 'Ações'].map((h) => (
+                <th key={h} className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-5 py-3">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className={emptyRow}>Nenhum produto encontrado.</td></tr>
+              <tr><td colSpan={5} className="text-center text-sm text-slate-400 py-10">Nenhum produto encontrado.</td></tr>
             ) : (
               filtered.map((product) => (
-                <tr key={product.id} className={tr}>
-                  <td className={td}>{product.name}</td>
-                  <td className={tdMuted}>{categoryName(product.categoryId)}</td>
-                  <td className={td}>{formatPrice(product.price)}</td>
-                  <td className={td}><StockBadge stock={product.stock} /></td>
-                  <td className={td}>
+                <tr key={product.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0">
+                  <td className="px-5 py-3 text-slate-700">{product.name}</td>
+                  <td className="px-5 py-3 text-slate-400">{categoryName(product.categoryId)}</td>
+                  <td className="px-5 py-3 text-slate-700">{formatPrice(product.price)}</td>
+                  <td className="px-5 py-3"><StockBadge stock={product.stock} /></td>
+                  <td className="px-5 py-3">
                     <div className="flex gap-1">
-                      <button className={actionBtn} title="Editar" onClick={() => setEditing(product)}>
+                      <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditing(product)}>
                         <Pencil size={15} />
-                      </button>
-                      <button className={actionBtnDanger} title="Excluir" onClick={() => handleDelete(product.id)}>
+                      </Button>
+                      <Button variant="ghost" size="icon" title="Excluir"
+                        className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => handleDelete(product.id)}
+                      >
                         <Trash2 size={15} />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

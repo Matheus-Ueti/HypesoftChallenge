@@ -1,12 +1,7 @@
 import { Search, Bell, LogOut } from 'lucide-react'
-
-// --- Tipos ---
-
 interface HeaderProps {
   onLogout: () => void
 }
-
-// --- Estilos ---
 
 const header       = 'h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6'
 const searchBar    = 'flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 w-72'
@@ -14,8 +9,6 @@ const searchInput  = 'bg-transparent text-sm text-slate-600 outline-none w-full 
 const actions      = 'flex items-center gap-1'
 const iconButton   = 'p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors'
 const logoutButton = 'p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors'
-
-// --- Componente ---
 
 export const Header = ({ onLogout }: HeaderProps) => (
   <header className={header}>

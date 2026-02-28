@@ -8,8 +8,6 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-// --- Tipos ---
-
 export interface CategoryChartData {
   categoria: string
   produtos: number
@@ -18,9 +16,6 @@ export interface CategoryChartData {
 interface CategoryChartProps {
   data: CategoryChartData[]
 }
-
-// --- Componente ---
-
 export const CategoryChart = ({ data }: CategoryChartProps) => (
   <ResponsiveContainer width="100%" height={220}>
     <BarChart data={data} barSize={28}>

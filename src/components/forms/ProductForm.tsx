@@ -3,9 +3,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
 import { useCategories } from '@/hooks/useCategories'
+import { Button }   from '@/components/ui/button'
+import { Input }    from '@/components/ui/input'
+import { Label }    from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import type { Product } from '@/types/product'
-
-// --- Schema ---
 
 const schema = z.object({
   name:        z.string().min(1, 'Nome é obrigatório'),
@@ -17,33 +19,15 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-// --- Tipos ---
-
 interface ProductFormProps {
   defaultValues?: Partial<Product>
   onSubmit: (data: FormData) => void
   onClose: () => void
 }
 
-// --- Estilos ---
-
-const overlay    = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50'
-const modal      = 'bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl'
-const header     = 'flex items-center justify-between mb-6'
-const title      = 'text-lg font-semibold text-slate-800'
-const closeBtn   = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors'
-const form       = 'flex flex-col gap-4'
-const fieldGroup = 'flex flex-col gap-1'
-const label      = 'text-sm font-medium text-slate-700'
-const input      = 'border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition'
-const inputError = 'border border-red-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-red-200 transition'
-const errorMsg   = 'text-xs text-red-500'
-const row        = 'grid grid-cols-2 gap-3'
-const footer     = 'flex justify-end gap-2 mt-2'
-const btnCancel  = 'px-4 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-100 transition-colors'
-const btnSubmit  = 'px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors'
-
-// --- Componente ---
+const errorCls    = 'border-red-300 focus-visible:ring-red-200'
+const selectBase  = 'w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring'
+const selectError = 'w-full border border-red-300 rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-red-200'
 
 export const ProductForm = ({ defaultValues, onSubmit, onClose }: ProductFormProps) => {
   const { data: categories = [] } = useCategories()
@@ -62,60 +46,66 @@ export const ProductForm = ({ defaultValues, onSubmit, onClose }: ProductFormPro
   const isEditing = !!defaultValues?.id
 
   return (
-    <div className={overlay} onClick={onClose}>
-      <div className={modal} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
 
-        <div className={header}>
-          <h2 className={title}>{isEditing ? 'Editar Produto' : 'Novo Produto'}</h2>
-          <button className={closeBtn} onClick={onClose}><X size={18} /></button>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-slate-800">
+            {isEditing ? 'Editar Produto' : 'Novo Produto'}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose}><X size={18} /></Button>
         </div>
 
-        <form className={form} onSubmit={handleSubmit(onSubmit)}>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
 
-          <div className={fieldGroup}>
-            <label htmlFor="name" className={label}>Nome</label>
-            <input id="name" className={errors.name ? inputError : input} {...register('name')} />
-            {errors.name && <span className={errorMsg}>{errors.name.message}</span>}
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="name">Nome</Label>
+            <Input id="name" className={errors.name ? errorCls : ''} {...register('name')} />
+            {errors.name && <span className="text-xs text-red-500">{errors.name.message}</span>}
           </div>
 
-          <div className={fieldGroup}>
-            <label htmlFor="description" className={label}>Descrição</label>
-            <textarea
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
               id="description"
               rows={2}
-              className={errors.description ? inputError : input}
+              className={errors.description ? errorCls : ''}
               {...register('description')}
             />
-            {errors.description && <span className={errorMsg}>{errors.description.message}</span>}
+            {errors.description && <span className="text-xs text-red-500">{errors.description.message}</span>}
           </div>
 
-          <div className={row}>
-            <div className={fieldGroup}>
-              <label htmlFor="price" className={label}>Preço (R$)</label>
-              <input id="price" type="number" step="0.01" className={errors.price ? inputError : input} {...register('price', { valueAsNumber: true })} />
-              {errors.price && <span className={errorMsg}>{errors.price.message}</span>}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="price">Preço (R$)</Label>
+              <Input id="price" type="number" step="0.01" className={errors.price ? errorCls : ''} {...register('price', { valueAsNumber: true })} />
+              {errors.price && <span className="text-xs text-red-500">{errors.price.message}</span>}
             </div>
-            <div className={fieldGroup}>
-              <label htmlFor="stock" className={label}>Estoque</label>
-              <input id="stock" type="number" className={errors.stock ? inputError : input} {...register('stock', { valueAsNumber: true })} />
-              {errors.stock && <span className={errorMsg}>{errors.stock.message}</span>}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="stock">Estoque</Label>
+              <Input id="stock" type="number" className={errors.stock ? errorCls : ''} {...register('stock', { valueAsNumber: true })} />
+              {errors.stock && <span className="text-xs text-red-500">{errors.stock.message}</span>}
             </div>
           </div>
 
-          <div className={fieldGroup}>
-            <label htmlFor="categoryId" className={label}>Categoria</label>
-            <select id="categoryId" className={errors.categoryId ? inputError : input} {...register('categoryId')}>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="categoryId">Categoria</Label>
+            <select
+              id="categoryId"
+              className={errors.categoryId ? selectError : selectBase}
+              {...register('categoryId')}
+            >
               <option value="">Selecione...</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
-            {errors.categoryId && <span className={errorMsg}>{errors.categoryId.message}</span>}
+            {errors.categoryId && <span className="text-xs text-red-500">{errors.categoryId.message}</span>}
           </div>
 
-          <div className={footer}>
-            <button type="button" className={btnCancel} onClick={onClose}>Cancelar</button>
-            <button type="submit" className={btnSubmit}>{isEditing ? 'Salvar' : 'Criar'}</button>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button type="submit">{isEditing ? 'Salvar' : 'Criar'}</Button>
           </div>
 
         </form>
