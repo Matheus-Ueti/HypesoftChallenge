@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
-import { Sidebar } from './sidebar'
-import { Header } from './header'
+import { Sidebar } from './SideBar'
+import { Header } from './Header'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 // --- Estilos ---
 
@@ -10,14 +11,18 @@ const main    = 'flex-1 overflow-y-auto p-6'
 
 // --- Componente ---
 
-export const MainLayout = () => (
-  <div className={layout}>
-    <Sidebar />
-    <div className={content}>
-      <Header />
-      <main className={main}>
-        <Outlet />
-      </main>
+export const MainLayout = () => {
+  const { logout } = useAuthContext()
+
+  return (
+    <div className={layout}>
+      <Sidebar />
+      <div className={content}>
+        <Header onLogout={logout} />
+        <main className={main}>
+          <Outlet />
+        </main>
+      </div>
     </div>
-  </div>
-)
+  )
+}

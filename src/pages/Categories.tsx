@@ -1,24 +1,14 @@
 import { useState } from 'react'
 import { Pencil, Trash2, Tag } from 'lucide-react'
 import { CategoryForm } from '@/components/forms/CategoryForm'
-import { MOCK_CATEGORIES } from '@/utils/mocks'
-
-// --- Tipos ---
-
-interface CategoryWithCount {
-  id: string
-  name: string
-  description: string
-  productCount: number
-}
-
-// --- Dados simulados ---
-// Serão substituídos pelos dados reais da API via TanStack Query
-
-const INITIAL_CATEGORIES: CategoryWithCount[] = MOCK_CATEGORIES.map((cat, i) => ({
-  ...cat,
-  productCount: [34, 28, 22, 18, 14, 11, 9, 8][i] ?? 0,
-}))
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from '@/hooks/useCategories'
+import { useProducts } from '@/hooks/useProducts'
+import type { Category } from '@/types/category'
 
 // --- Estilos ---
 
@@ -38,33 +28,37 @@ const cardDesc     = 'text-xs text-slate-400 leading-relaxed'
 const cardFooter   = 'flex items-center justify-between pt-2 border-t border-slate-50'
 const countLabel   = 'text-xs text-slate-400'
 const countValue   = 'text-xs font-semibold text-indigo-600'
+const feedbackMsg  = 'text-center text-sm text-slate-400 py-20'
+const errorMsg     = 'text-center text-sm text-red-500 py-20'
 
 // --- Sub-componente ---
 
-interface CategoryCardProps extends CategoryWithCount {
-  onEdit:   (category: CategoryWithCount) => void
-  onDelete: (id: string) => void
+interface CategoryCardProps {
+  category:     Category
+  productCount: number
+  onEdit:       (category: Category) => void
+  onDelete:     (id: string) => void
 }
 
-const CategoryCard = ({ id, name, description, productCount, onEdit, onDelete }: CategoryCardProps) => (
+const CategoryCard = ({ category, productCount, onEdit, onDelete }: CategoryCardProps) => (
   <div className={card}>
     <div className={cardHeader}>
       <div className={iconWrapper}>
         <Tag size={16} />
       </div>
       <div className={actions}>
-        <button className={actionBtn} title="Editar" onClick={() => onEdit({ id, name, description, productCount })}>
+        <button className={actionBtn} title="Editar" onClick={() => onEdit(category)}>
           <Pencil size={14} />
         </button>
-        <button className={actionBtn} title="Excluir" onClick={() => onDelete(id)}>
+        <button className={actionBtn} title="Excluir" onClick={() => onDelete(category.id)}>
           <Trash2 size={14} />
         </button>
       </div>
     </div>
 
     <div>
-      <p className={cardName}>{name}</p>
-      <p className={cardDesc}>{description}</p>
+      <p className={cardName}>{category.name}</p>
+      <p className={cardDesc}>{category.description}</p>
     </div>
 
     <div className={cardFooter}>
@@ -77,36 +71,29 @@ const CategoryCard = ({ id, name, description, productCount, onEdit, onDelete }:
 // --- Componente ---
 
 export const Categories = () => {
-  const [isOpen, setIsOpen]         = useState(false)
-  const [editing, setEditing]       = useState<CategoryWithCount | null>(null)
-  const [categories, setCategories] = useState(INITIAL_CATEGORIES)
+  const { data: categories = [], isLoading, isError } = useCategories()
+  const { data: products = [] }                       = useProducts()
+
+  const createCategory = useCreateCategory()
+  const updateCategory = useUpdateCategory()
+  const deleteCategory = useDeleteCategory()
+
+  const [isOpen, setIsOpen]   = useState(false)
+  const [editing, setEditing] = useState<Category | null>(null)
+
+  const productCountFor = (categoryId: string) =>
+    products.filter((p) => p.categoryId === categoryId).length
 
   const handleCreate = (data: { name: string; description?: string }) => {
-    const newCategory: CategoryWithCount = {
-      id:           String(Date.now()),
-      name:         data.name,
-      description:  data.description ?? '',
-      productCount: 0,
-    }
-    setCategories((prev) => [...prev, newCategory])
-    setIsOpen(false)
+    createCategory.mutate(data, { onSuccess: () => setIsOpen(false) })
   }
 
   const handleEdit = (data: { name: string; description?: string }) => {
     if (!editing) return
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.id === editing.id
-          ? { ...cat, name: data.name, description: data.description ?? '' }
-          : cat
-      )
-    )
-    setEditing(null)
+    updateCategory.mutate({ id: editing.id, data }, { onSuccess: () => setEditing(null) })
   }
 
-  const handleDelete = (id: string) => {
-    setCategories((prev) => prev.filter((cat) => cat.id !== id))
-  }
+  const handleDelete = (id: string) => deleteCategory.mutate(id)
 
   return (
   <div className={page}>
@@ -134,11 +121,22 @@ export const Categories = () => {
       <button className={btnPrimary} onClick={() => setIsOpen(true)}>+ Nova Categoria</button>
     </div>
 
-    <div className={grid}>
-      {categories.map((category) => (
-        <CategoryCard key={category.id} {...category} onEdit={setEditing} onDelete={handleDelete} />
-      ))}
-    </div>
+    {isLoading && <p className={feedbackMsg}>Carregando categorias...</p>}
+    {isError   && <p className={errorMsg}>Erro ao carregar categorias. Tente novamente.</p>}
+
+    {!isLoading && !isError && (
+      <div className={grid}>
+        {categories.map((category) => (
+          <CategoryCard
+            key={category.id}
+            category={category}
+            productCount={productCountFor(category.id)}
+            onEdit={setEditing}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
+    )}
 
   </div>
   )

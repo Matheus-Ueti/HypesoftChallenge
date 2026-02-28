@@ -1,32 +1,12 @@
-import type { Category, CreateCategoryDTO } from '@/types/category'
+import { api } from '@/lib/api'
+import type { Category, CreateCategoryDTO, UpdateCategoryDTO } from '@/types/category'
 
-const BASE_URL = `${import.meta.env.VITE_API_URL}/categories`
+const BASE = '/categories'
 
 export const categoriesService = {
-  getAll: async (): Promise<Category[]> => {
-    const response = await fetch(BASE_URL)
-    if (!response.ok) throw new Error('Erro ao buscar categorias')
-    return response.json()
-  },
-
-  getById: async (id: string): Promise<Category> => {
-    const response = await fetch(`${BASE_URL}/${id}`)
-    if (!response.ok) throw new Error('Categoria não encontrada')
-    return response.json()
-  },
-
-  create: async (data: CreateCategoryDTO): Promise<Category> => {
-    const response = await fetch(BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Erro ao criar categoria')
-    return response.json()
-  },
-
-  remove: async (id: string): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' })
-    if (!response.ok) throw new Error('Erro ao excluir categoria')
-  },
+  getAll:  (): Promise<Category[]>  => api.get<Category[]>(BASE).then((r) => r.data),
+  getById: (id: string)             => api.get<Category>(`${BASE}/${id}`).then((r) => r.data),
+  create:  (data: CreateCategoryDTO)           => api.post<Category>(BASE, data).then((r) => r.data),
+  update:  (id: string, data: UpdateCategoryDTO) => api.put<Category>(`${BASE}/${id}`, data).then((r) => r.data),
+  remove:  (id: string)             => api.delete(`${BASE}/${id}`).then(() => undefined),
 }

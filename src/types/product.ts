@@ -17,4 +17,4 @@ export interface CreateProductDTO {
   stock: number
 }
 
-export interface UpdateProductDTO extends Partial<CreateProductDTO> {}
+export type UpdateProductDTO = Partial<CreateProductDTO>

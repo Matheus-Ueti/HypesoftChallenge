@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X } from 'lucide-react'
 import { useCategories } from '@/hooks/useCategories'
-import { MOCK_CATEGORIES } from '@/utils/mocks'
 import type { Product } from '@/types/product'
 
 // --- Schema ---
@@ -47,8 +46,7 @@ const btnSubmit  = 'px-4 py-2 text-sm font-medium text-white bg-indigo-600 round
 // --- Componente ---
 
 export const ProductForm = ({ defaultValues, onSubmit, onClose }: ProductFormProps) => {
-  const { data: apiCategories } = useCategories()
-  const categories = apiCategories ?? MOCK_CATEGORIES
+  const { data: categories = [] } = useCategories()
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),

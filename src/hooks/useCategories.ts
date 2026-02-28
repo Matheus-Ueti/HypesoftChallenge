@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { categoriesService } from '@/services/categories.service'
-import type { CreateCategoryDTO } from '@/types/category'
+import type { CreateCategoryDTO, UpdateCategoryDTO } from '@/types/category'
 
 const QUERY_KEY = 'categories'
 
@@ -22,6 +22,16 @@ export const useCreateCategory = () => {
 
   return useMutation({
     mutationFn: (data: CreateCategoryDTO) => categoriesService.create(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  })
+}
+
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCategoryDTO }) =>
+      categoriesService.update(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
   })
 }

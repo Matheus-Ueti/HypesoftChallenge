@@ -26,11 +26,12 @@ export const useCreateProduct = () => {
   })
 }
 
-export const useUpdateProduct = (id: string) => {
+export const useUpdateProduct = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: UpdateProductDTO) => productsService.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateProductDTO }) =>
+      productsService.update(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
   })
 }

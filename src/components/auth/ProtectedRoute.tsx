@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 // Quando o Keycloak estiver integrado, basta trocar o valor de isAuthenticated.
 
 export const ProtectedRoute = ({ isAuthenticated }: ProtectedRouteProps) => {
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/" replace />
 
   return <Outlet />
 }

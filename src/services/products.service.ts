@@ -1,42 +1,12 @@
+import { api } from '@/lib/api'
 import type { Product, CreateProductDTO, UpdateProductDTO } from '@/types/product'
 
-const BASE_URL = `${import.meta.env.VITE_API_URL}/products`
+const BASE = '/products'
 
 export const productsService = {
-  getAll: async (): Promise<Product[]> => {
-    const response = await fetch(BASE_URL)
-    if (!response.ok) throw new Error('Erro ao buscar produtos')
-    return response.json()
-  },
-
-  getById: async (id: string): Promise<Product> => {
-    const response = await fetch(`${BASE_URL}/${id}`)
-    if (!response.ok) throw new Error('Produto não encontrado')
-    return response.json()
-  },
-
-  create: async (data: CreateProductDTO): Promise<Product> => {
-    const response = await fetch(BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Erro ao criar produto')
-    return response.json()
-  },
-
-  update: async (id: string, data: UpdateProductDTO): Promise<Product> => {
-    const response = await fetch(`${BASE_URL}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Erro ao atualizar produto')
-    return response.json()
-  },
-
-  remove: async (id: string): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' })
-    if (!response.ok) throw new Error('Erro ao excluir produto')
-  },
+  getAll:   (): Promise<Product[]>  => api.get<Product[]>(BASE).then((r) => r.data),
+  getById:  (id: string)            => api.get<Product>(`${BASE}/${id}`).then((r) => r.data),
+  create:   (data: CreateProductDTO)          => api.post<Product>(BASE, data).then((r) => r.data),
+  update:   (id: string, data: UpdateProductDTO) => api.put<Product>(`${BASE}/${id}`, data).then((r) => r.data),
+  remove:   (id: string)            => api.delete(`${BASE}/${id}`).then(() => undefined),
 }
