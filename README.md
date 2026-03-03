@@ -66,7 +66,7 @@ src/
 
 ### 1. Subir o backend
 
-No repositório do backend (`HypesoftChallengeBackEnd`):
+No repositório do backend (`HypesoftAPI`):
 
 ```bash
 docker-compose up -d
