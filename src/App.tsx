@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { MainLayout } from './components/layout/MainLayout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { Dashboard } from './pages/Dashboard'
@@ -21,6 +22,7 @@ export const App = () => {
   return (
     <AuthContext.Provider value={{ logout, isAuthenticated }}>
       <BrowserRouter>
+        <Toaster richColors position="top-right" />
         <Routes>
           <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
             <Route element={<MainLayout />}>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Pencil, Trash2, Tag } from 'lucide-react'
+import { toast } from 'sonner'
 import { CategoryForm } from '@/components/forms/CategoryForm'
 import {
   useCategories,
@@ -53,23 +54,51 @@ export const Categories = () => {
 
   const [isOpen, setIsOpen]   = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const productCountFor = (categoryId: string) =>
     products.filter((p) => p.categoryId === categoryId).length
 
   const handleCreate = (data: { name: string; description?: string }) => {
-    createCategory.mutate(data, { onSuccess: () => setIsOpen(false) })
+    createCategory.mutate(data, {
+      onSuccess: () => { setIsOpen(false); toast.success('Categoria criada com sucesso!') },
+      onError:   () => toast.error('Erro ao criar categoria.'),
+    })
   }
 
   const handleEdit = (data: { name: string; description?: string }) => {
     if (!editing) return
-    updateCategory.mutate({ id: editing.id, data }, { onSuccess: () => setEditing(null) })
+    updateCategory.mutate({ id: editing.id, data }, {
+      onSuccess: () => { setEditing(null); toast.success('Categoria atualizada!') },
+      onError:   () => toast.error('Erro ao atualizar categoria.'),
+    })
   }
 
-  const handleDelete = (id: string) => deleteCategory.mutate(id)
+  const handleDelete = (id: string) => setConfirmId(id)
+
+  const confirmDelete = () => {
+    if (!confirmId) return
+    deleteCategory.mutate(confirmId, {
+      onSuccess: () => { setConfirmId(null); toast.success('Categoria excluída.') },
+      onError:   () => { setConfirmId(null); toast.error('Erro ao excluir categoria.') },
+    })
+  }
 
   return (
   <div className="space-y-6">
+
+    {confirmId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm space-y-4">
+          <h2 className="text-base font-semibold text-slate-800">Excluir categoria</h2>
+          <p className="text-sm text-slate-500">Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setConfirmId(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteCategory.isPending}>Excluir</Button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {isOpen && (
       <CategoryForm onClose={() => setIsOpen(false)} onSubmit={handleCreate} />

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Pencil, Trash2, Search } from 'lucide-react'
+import { toast } from 'sonner'
 import { ProductForm } from '@/components/forms/ProductForm'
 import {
   useProducts,
@@ -36,6 +37,7 @@ export const Products = () => {
   const [editing, setEditing]               = useState<Product | null>(null)
   const [search, setSearch]                 = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [confirmId, setConfirmId]           = useState<string | null>(null)
 
   const categoryName = (categoryId: string) =>
     categories.find((c) => c.id === categoryId)?.name ?? '-'
@@ -50,18 +52,45 @@ export const Products = () => {
   )
 
   const handleCreate = (data: CreateProductDTO) => {
-    createProduct.mutate(data, { onSuccess: () => setIsOpen(false) })
+    createProduct.mutate(data, {
+      onSuccess: () => { setIsOpen(false); toast.success('Produto criado com sucesso!') },
+      onError:   () => toast.error('Erro ao criar produto.'),
+    })
   }
 
   const handleEdit = (data: CreateProductDTO) => {
     if (!editing) return
-    updateProduct.mutate({ id: editing.id, data }, { onSuccess: () => setEditing(null) })
+    updateProduct.mutate({ id: editing.id, data }, {
+      onSuccess: () => { setEditing(null); toast.success('Produto atualizado!') },
+      onError:   () => toast.error('Erro ao atualizar produto.'),
+    })
   }
 
-  const handleDelete = (id: string) => deleteProduct.mutate(id)
+  const handleDelete = (id: string) => setConfirmId(id)
+
+  const confirmDelete = () => {
+    if (!confirmId) return
+    deleteProduct.mutate(confirmId, {
+      onSuccess: () => { setConfirmId(null); toast.success('Produto excluído.') },
+      onError:   () => { setConfirmId(null); toast.error('Erro ao excluir produto.') },
+    })
+  }
 
   return (
   <div className="space-y-6">
+
+    {confirmId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm space-y-4">
+          <h2 className="text-base font-semibold text-slate-800">Excluir produto</h2>
+          <p className="text-sm text-slate-500">Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setConfirmId(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteProduct.isPending}>Excluir</Button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {isOpen && (
       <ProductForm onClose={() => setIsOpen(false)} onSubmit={handleCreate} />
